@@ -1,4 +1,4 @@
-module github.com/ThomasCaud/go-rest-api/src
+module github.com/ThomasCaud/go-rest-api
 
 go 1.15
 
