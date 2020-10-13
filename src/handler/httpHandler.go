@@ -1,11 +1,11 @@
-package main
+package handler
 
 import "net/http"
 
-func handleNoContent(w http.ResponseWriter) {
+func HandleNoContent(w http.ResponseWriter) {
 	http.Error(w, "No Content", http.StatusNoContent)
 }
 
-func handleCreated(w http.ResponseWriter) {
+func HandleCreated(w http.ResponseWriter) {
 	http.Error(w, "Created", http.StatusCreated)
 }

@@ -1,33 +1,28 @@
-package main
+package handler
 
 import (
 	"encoding/json"
 	"io/ioutil"
 	"net/http"
 
+	"github.com/ThomasCaud/go-rest-api/src/model"
 	"github.com/gorilla/mux"
 )
 
-type Book struct {
-	Id    string `json:"Id"`
-	Title string `json:"title"`
-	Price int    `json:"price"`
-}
+var Books []model.Book
 
-var Books []Book
-
-func populateBooks() {
-	Books = []Book{
+func PopulateBooks() {
+	Books = []model.Book{
 		{Id: "1", Title: "Cracking the coding interview", Price: 40},
 		{Id: "2", Title: "Never split the difference", Price: 30},
 	}
 }
 
-func get(w http.ResponseWriter, r *http.Request) {
+func Get(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(Books)
 }
 
-func getItem(w http.ResponseWriter, r *http.Request) {
+func GetItem(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	id := vars["id"]
 
@@ -44,11 +39,11 @@ func getItem(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func create(w http.ResponseWriter, r *http.Request) {
+func Create(w http.ResponseWriter, r *http.Request) {
 	// todo when db: auto generate id
 	reqBody, _ := ioutil.ReadAll(r.Body)
 
-	var book Book
+	var book model.Book
 	json.Unmarshal(reqBody, &book)
 
 	Books = append(Books, book)
@@ -57,7 +52,7 @@ func create(w http.ResponseWriter, r *http.Request) {
 	// todo return 201
 }
 
-func delete(w http.ResponseWriter, r *http.Request) {
+func Delete(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	id := vars["id"]
 
@@ -71,13 +66,13 @@ func delete(w http.ResponseWriter, r *http.Request) {
 	http.NotFound(w, r)
 }
 
-func put(w http.ResponseWriter, r *http.Request) {
+func Put(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	id := vars["id"]
 
 	reqBody, _ := ioutil.ReadAll(r.Body)
 
-	var newBook Book
+	var newBook model.Book
 	json.Unmarshal(reqBody, &newBook)
 
 	found := false
