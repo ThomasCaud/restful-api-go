@@ -8,7 +8,7 @@ import (
 )
 
 func handleRequests() {
-	log.Fatal(http.ListenAndServe(":10000", getRouter()))
+	log.Fatal(http.ListenAndServe(":3000", getRouter()))
 }
 
 func main() {
