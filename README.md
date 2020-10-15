@@ -2,7 +2,8 @@
 Learnings Go things using the classical Book API.
 
 - ✓ Manage CRUD
-- Use database
+- ✓ Dockerize API
+- Use dockerized database
 - Keep HTTP calls logs
 - Use juju/errors
 - Manage authent
