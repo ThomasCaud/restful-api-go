@@ -8,7 +8,10 @@ services:
     volumes:
         - .:/go/src/api
     working_dir: /go/src/api
-    # command: go run main.go
     tty: true
     ports:
       - "3000:3000"
+  db:
+    image: postgres
+    volumes:
+      - ./initdb.sql:/docker-entrypoint-initdb.d/initdb.sql
