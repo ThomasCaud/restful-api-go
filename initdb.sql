@@ -1,9 +1,8 @@
-CREATE TABLE birds (
-  id SERIAL PRIMARY KEY,
-  species VARCHAR(256),
-  description VARCHAR(1024)
+CREATE TABLE books (
+    id SERIAL PRIMARY KEY,
+    title VARCHAR(256),
+    price int
 );
 
-INSERT INTO birds (species, description) VALUES ('Canary', 'Small yellow bird');
-select * from birds;
-select species, description from birds;
+INSERT INTO books (title, price) VALUES ('Cracking the coding interview', 20);
+INSERT INTO books (title, price) VALUES ('Never split the difference', 25);

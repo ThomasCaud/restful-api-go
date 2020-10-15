@@ -18,8 +18,14 @@ func PopulateBooks() {
 	}
 }
 
-func Get(w http.ResponseWriter, r *http.Request) {
-	json.NewEncoder(w).Encode(Books)
+func (db *DB) Get(w http.ResponseWriter, r *http.Request) {
+	books, err := db.AllBooks()
+	if err != nil {
+		http.Error(w, http.StatusText(500), 500)
+		return
+	}
+
+	json.NewEncoder(w).Encode(books)
 }
 
 func GetItem(w http.ResponseWriter, r *http.Request) {
