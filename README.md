@@ -8,6 +8,7 @@ Learnings Go things using the classical Book API.
 - Generate swagger
 - Keep HTTP calls logs
 - Use juju/errors
+- Broker using
 - Manage authent
 - Context
 
