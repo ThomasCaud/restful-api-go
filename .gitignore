@@ -3,3 +3,4 @@ src/ejecutable.exe
 github.com
 main
 docker-compose.override.yml
+.idea/

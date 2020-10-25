@@ -2,49 +2,54 @@ package handler
 
 import (
 	"encoding/json"
-	"io/ioutil"
+	"log"
 	"net/http"
+	"strconv"
 
 	"github.com/ThomasCaud/go-rest-api/model"
 	"github.com/gorilla/mux"
 )
 
+type BooksDatabase interface {
+	GetBooks() ([]model.Book, error)
+	GetBook() (model.Book, error)
+}
+
 var Books []model.Book
 
-func PopulateBooks() {
-	Books = []model.Book{
-		{Id: "1", Title: "Cracking the coding interview", Price: 40},
-		{Id: "2", Title: "Never split the difference", Price: 30},
-	}
-}
-
-func (db *DB) Get(w http.ResponseWriter, r *http.Request) {
-	books, err := db.AllBooks()
-	if err != nil {
-		http.Error(w, http.StatusText(500), 500)
-		return
-	}
-
-	json.NewEncoder(w).Encode(books)
-}
-
-func GetItem(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-	id := vars["id"]
-
-	found := false
-	for _, book := range Books {
-		if book.Id == id {
-			json.NewEncoder(w).Encode(book)
-			found = true
+func GetBooks(app *App) func(w http.ResponseWriter, r *http.Request) {
+	return func(w http.ResponseWriter, r *http.Request) {
+		books, err := app.BooksDatabase.GetBooks()
+		if err != nil {
+			log.Fatal(err.Error())
+			http.Error(w, http.StatusText(500), 500)
+			return
 		}
-	}
 
-	if !found {
-		http.NotFound(w, r)
+		json.NewEncoder(w).Encode(books)
 	}
 }
 
+func GetBook(app *App) func(w http.ResponseWriter, r *http.Request) {
+	return func(w http.ResponseWriter, r *http.Request) {
+		vars := mux.Vars(r)
+		id, err := strconv.Atoi(vars["id"])
+		if err != nil {
+			http.Error(w, "Id must be an integer", 500)
+			return
+		}
+
+		book, err := app.BooksDatabase.GetBook(id)
+		if err != nil {
+			http.Error(w, "Not found.", 404)
+			return
+		}
+
+		json.NewEncoder(w).Encode(book)
+	}
+}
+
+/*
 func Create(w http.ResponseWriter, r *http.Request) {
 	// todo when db: auto generate id
 	reqBody, _ := ioutil.ReadAll(r.Body)
@@ -94,3 +99,4 @@ func Put(w http.ResponseWriter, r *http.Request) {
 		http.NotFound(w, r)
 	}
 }
+*/
