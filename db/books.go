@@ -2,6 +2,7 @@ package db
 
 import (
 	"database/sql"
+	"errors"
 	"log"
 
 	"github.com/ThomasCaud/go-rest-api/model"
@@ -47,4 +48,24 @@ func (this BooksDatabaseImpl) GetBook(id int) (model.Book, error) {
 	}
 
 	return book, err
+}
+
+func (this BooksDatabaseImpl) DeleteBook(id int) error {
+	query := "delete from books where id = $1"
+	res, err := this.DB.Exec(query, id)
+	if err != nil {
+		return err
+	}
+
+	count, err := res.RowsAffected()
+	if err != nil {
+		return err
+	}
+
+	if count == 0 {
+		return errors.New("Not found.")
+	}
+
+	// todo return deleted book?
+	return nil
 }

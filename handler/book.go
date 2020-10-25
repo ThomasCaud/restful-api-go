@@ -13,6 +13,7 @@ import (
 type BooksDatabase interface {
 	GetBooks() ([]model.Book, error)
 	GetBook() (model.Book, error)
+	DeleteBook() (model.Book, error)
 }
 
 var Books []model.Book
@@ -49,6 +50,25 @@ func GetBook(app *App) func(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func DeleteBook(app *App) func(w http.ResponseWriter, r *http.Request) {
+	return func(w http.ResponseWriter, r *http.Request) {
+		vars := mux.Vars(r)
+		id, err := strconv.Atoi(vars["id"])
+		if err != nil {
+			http.Error(w, "Id must be an integer", 500)
+			return
+		}
+
+		err = app.BooksDatabase.DeleteBook(id)
+		if err != nil {
+			http.Error(w, "Not found.", 404)
+			return
+		}
+
+		json.NewEncoder(w).Encode("Deleted.")
+	}
+}
+
 /*
 func Create(w http.ResponseWriter, r *http.Request) {
 	// todo when db: auto generate id
@@ -61,20 +81,6 @@ func Create(w http.ResponseWriter, r *http.Request) {
 
 	json.NewEncoder(w).Encode(Books)
 	// todo return 201
-}
-
-func Delete(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-	id := vars["id"]
-
-	for index, book := range Books {
-		if book.Id == id {
-			Books = append(Books[:index], Books[index+1:]...)
-			HandleNoContent(w)
-		}
-	}
-
-	http.NotFound(w, r)
 }
 
 func Put(w http.ResponseWriter, r *http.Request) {
