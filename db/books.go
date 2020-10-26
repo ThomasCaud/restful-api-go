@@ -6,6 +6,7 @@ import (
 	"log"
 
 	"github.com/ThomasCaud/go-rest-api/model"
+	"github.com/google/uuid"
 )
 
 type BooksDatabaseImpl struct {
@@ -40,7 +41,7 @@ func (this BooksDatabaseImpl) GetBooks() ([]*model.Book, error) {
 	return books, nil
 }
 
-func (this BooksDatabaseImpl) GetBook(id string) (model.Book, error) {
+func (this BooksDatabaseImpl) GetBook(id uuid.UUID) (model.Book, error) {
 	var book model.Book
 	query := "SELECT * FROM " + tableName + " WHERE id = $1"
 
@@ -62,7 +63,7 @@ func (this BooksDatabaseImpl) CreateBook(book model.Book) error {
 	return nil
 }
 
-func (this BooksDatabaseImpl) DeleteBook(id string) error {
+func (this BooksDatabaseImpl) DeleteBook(id uuid.UUID) error {
 	query := "DELETE FROM " + tableName + " WHERE id = $1"
 	res, err := this.DB.Exec(query, id)
 	if err != nil {

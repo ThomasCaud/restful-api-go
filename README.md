@@ -5,11 +5,13 @@ Learnings Go concepts using the classical Book API: Dockerized and tested API, c
 - ✓ Dockerize the API
 - ✓ Dockerize a database
 - ✓ Use this database from API
+- ✓ Use UUID
+- Manage migrations
 - Generate swagger
-- e2e testing
+- Manage validator differently
+- IP e2e testing
 - Keep HTTP calls logs
 - Use juju/errors
-- Add validator?
 - Manage authent
 - Context
 
@@ -17,7 +19,3 @@ Learnings Go concepts using the classical Book API: Dockerized and tested API, c
 ```
 #cp docker-compose.override.yml.dist docker-compose.override.yml
 ```
-
-Change id to uuid
-Validators
-Fix interface (BooksDatabase is useless ; main should use it)

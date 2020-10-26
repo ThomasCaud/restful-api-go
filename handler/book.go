@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	"github.com/ThomasCaud/go-rest-api/model"
+	"github.com/google/uuid"
 	"github.com/gorilla/mux"
 )
 
@@ -27,6 +28,15 @@ func GetBooksHandlers(app *App) []Handler {
 	}
 }
 
+func getUuidFromVar(w http.ResponseWriter, r *http.Request) (uuid.UUID, error) {
+	vars := mux.Vars(r)
+	id, err := uuid.Parse(vars["id"])
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+	}
+	return id, err
+}
+
 func getCollection(app *App) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		books, err := app.BooksDatabase.GetBooks()
@@ -41,8 +51,12 @@ func getCollection(app *App) func(w http.ResponseWriter, r *http.Request) {
 
 func getItem(app *App) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
-		vars := mux.Vars(r)
-		book, err := app.BooksDatabase.GetBook(vars["id"])
+		id, err := getUuidFromVar(w, r)
+		if err != nil {
+			return
+		}
+
+		book, err := app.BooksDatabase.GetBook(id)
 
 		if err != nil {
 			http.Error(w, "Not found.", http.StatusNotFound)
@@ -55,13 +69,18 @@ func getItem(app *App) func(w http.ResponseWriter, r *http.Request) {
 
 func create(app *App) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
-		// todo when db: auto generate id
 		reqBody, _ := ioutil.ReadAll(r.Body)
-
 		var book model.Book
 		json.Unmarshal(reqBody, &book)
 
-		err := app.BooksDatabase.CreateBook(book)
+		id, err := uuid.NewRandom()
+		if err != nil {
+			http.Error(w, err.Error(), 400)
+			return
+		}
+		book.Id = id
+
+		err = app.BooksDatabase.CreateBook(book)
 		if err != nil {
 			http.Error(w, err.Error(), 400)
 			return
@@ -74,9 +93,12 @@ func create(app *App) func(w http.ResponseWriter, r *http.Request) {
 
 func delete(app *App) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
-		vars := mux.Vars(r)
+		id, err := getUuidFromVar(w, r)
+		if err != nil {
+			return
+		}
 
-		err := app.BooksDatabase.DeleteBook(vars["id"])
+		err = app.BooksDatabase.DeleteBook(id)
 		if err != nil {
 			http.Error(w, "Not found.", http.StatusNotFound)
 			return
@@ -92,10 +114,13 @@ func put(app *App) func(w http.ResponseWriter, r *http.Request) {
 		var updatedBook model.Book
 		json.Unmarshal(reqBody, &updatedBook)
 
-		vars := mux.Vars(r)
-		updatedBook.Id = vars["id"]
+		id, err := getUuidFromVar(w, r)
+		if err != nil {
+			return
+		}
+		updatedBook.Id = id
 
-		err := app.BooksDatabase.PutBook(updatedBook)
+		err = app.BooksDatabase.PutBook(updatedBook)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
