@@ -19,15 +19,15 @@ var Books []model.Book
 
 func GetBooksHandlers(app *App) []Handler {
 	return []Handler{
-		{"/books", GetBooks(app), "GET"},
-		{"/books", CreateBook(app), "POST"},
-		{"/books/{id}", DeleteBook(app), "DELETE"},
-		{"/books/{id}", PutBook(app), "PUT"},
-		{"/books/{id}", GetBook(app), "GET"},
+		{"/books", getCollection(app), "GET"},
+		{"/books", create(app), "POST"},
+		{"/books/{id}", delete(app), "DELETE"},
+		{"/books/{id}", put(app), "PUT"},
+		{"/books/{id}", getItem(app), "GET"},
 	}
 }
 
-func GetBooks(app *App) func(w http.ResponseWriter, r *http.Request) {
+func getCollection(app *App) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		books, err := app.BooksDatabase.GetBooks()
 		if err != nil {
@@ -39,7 +39,7 @@ func GetBooks(app *App) func(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func GetBook(app *App) func(w http.ResponseWriter, r *http.Request) {
+func getItem(app *App) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		vars := mux.Vars(r)
 		book, err := app.BooksDatabase.GetBook(vars["id"])
@@ -53,7 +53,7 @@ func GetBook(app *App) func(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func CreateBook(app *App) func(w http.ResponseWriter, r *http.Request) {
+func create(app *App) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		// todo when db: auto generate id
 		reqBody, _ := ioutil.ReadAll(r.Body)
@@ -72,7 +72,7 @@ func CreateBook(app *App) func(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func DeleteBook(app *App) func(w http.ResponseWriter, r *http.Request) {
+func delete(app *App) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		vars := mux.Vars(r)
 
@@ -86,7 +86,7 @@ func DeleteBook(app *App) func(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func PutBook(app *App) func(w http.ResponseWriter, r *http.Request) {
+func put(app *App) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		reqBody, _ := ioutil.ReadAll(r.Body)
 		var updatedBook model.Book
