@@ -1,6 +1,8 @@
 package handler
 
 import (
+	"net/http"
+
 	"github.com/ThomasCaud/go-rest-api/db"
 	"github.com/gorilla/mux"
 )
@@ -9,13 +11,19 @@ type App struct {
 	BooksDatabase db.BooksDatabaseImpl
 }
 
+type Handler struct {
+	path   string
+	f      func(http.ResponseWriter, *http.Request)
+	method string
+}
+
 func GetRouter(app *App) *mux.Router {
 	router := mux.NewRouter().StrictSlash(true)
-	router.HandleFunc("/books", GetBooks(app)).Methods("GET")
-	router.HandleFunc("/books", CreateBook(app)).Methods("POST")
-	router.HandleFunc("/books/{id}", DeleteBook(app)).Methods("DELETE")
-	router.HandleFunc("/books/{id}", PutBook(app)).Methods("PUT")
-	router.HandleFunc("/books/{id}", GetBook(app)).Methods("GET")
+
+	booksHandlers := GetBooksHandlers(app)
+	for _, handler := range booksHandlers {
+		router.HandleFunc(handler.path, handler.f).Methods(handler.method)
+	}
 
 	return router
 }

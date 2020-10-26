@@ -62,7 +62,7 @@ func (this BooksDatabaseImpl) CreateBook(book model.Book) error {
 	return nil
 }
 
-func (this BooksDatabaseImpl) DeleteBook(id int) error {
+func (this BooksDatabaseImpl) DeleteBook(id string) error {
 	query := "DELETE FROM " + tableName + " WHERE id = $1"
 	res, err := this.DB.Exec(query, id)
 	if err != nil {

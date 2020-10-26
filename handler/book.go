@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"io/ioutil"
 	"net/http"
-	"strconv"
 
 	"github.com/ThomasCaud/go-rest-api/model"
 	"github.com/gorilla/mux"
@@ -17,6 +16,16 @@ type BooksDatabase interface {
 }
 
 var Books []model.Book
+
+func GetBooksHandlers(app *App) []Handler {
+	return []Handler{
+		{"/books", GetBooks(app), "GET"},
+		{"/books", CreateBook(app), "POST"},
+		{"/books/{id}", DeleteBook(app), "DELETE"},
+		{"/books/{id}", PutBook(app), "PUT"},
+		{"/books/{id}", GetBook(app), "GET"},
+	}
+}
 
 func GetBooks(app *App) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
@@ -66,13 +75,8 @@ func CreateBook(app *App) func(w http.ResponseWriter, r *http.Request) {
 func DeleteBook(app *App) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		vars := mux.Vars(r)
-		id, err := strconv.Atoi(vars["id"])
-		if err != nil {
-			http.Error(w, "Id must be an integer.", http.StatusBadRequest)
-			return
-		}
 
-		err = app.BooksDatabase.DeleteBook(id)
+		err := app.BooksDatabase.DeleteBook(vars["id"])
 		if err != nil {
 			http.Error(w, "Not found.", http.StatusNotFound)
 			return
