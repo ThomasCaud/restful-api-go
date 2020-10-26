@@ -12,7 +12,7 @@ type App struct {
 func GetRouter(app *App) *mux.Router {
 	router := mux.NewRouter().StrictSlash(true)
 	router.HandleFunc("/books", GetBooks(app)).Methods("GET")
-	// router.HandleFunc("/books", app.Create).Methods("POST")
+	router.HandleFunc("/books", CreateBook(app)).Methods("POST")
 	router.HandleFunc("/books/{id}", DeleteBook(app)).Methods("DELETE")
 	// router.HandleFunc("/books/{id}", app.Put).Methods("PUT")
 	router.HandleFunc("/books/{id}", GetBook(app)).Methods("GET")

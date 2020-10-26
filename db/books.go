@@ -50,8 +50,20 @@ func (this BooksDatabaseImpl) GetBook(id int) (model.Book, error) {
 	return book, err
 }
 
+func (this BooksDatabaseImpl) CreateBook(book model.Book) error {
+	query := `
+	INSERT INTO books (id, title, price)
+	VALUES ($1, $2, $3)`
+	_, err := this.DB.Exec(query, book.Id, book.Title, book.Price)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func (this BooksDatabaseImpl) DeleteBook(id int) error {
-	query := "delete from books where id = $1"
+	query := "DELETE FROM books WHERE id = $1"
 	res, err := this.DB.Exec(query, id)
 	if err != nil {
 		return err

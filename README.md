@@ -1,5 +1,5 @@
 # Learning roadmap
-Learnings Go things using the classical Book API.
+Learnings Go concepts using the classical Book API: Dockerized and tested API, connected to database, with logs and authent management...
 
 - ✓ Manage CRUD
 - ✓ Dockerize API
@@ -9,6 +9,7 @@ Learnings Go things using the classical Book API.
 - e2e testing
 - Keep HTTP calls logs
 - Use juju/errors
+- Add validator?
 - Manage authent
 - Context
 
