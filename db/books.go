@@ -12,8 +12,10 @@ type BooksDatabaseImpl struct {
 	DB *sql.DB
 }
 
+const tableName = "books"
+
 func (this BooksDatabaseImpl) GetBooks() ([]*model.Book, error) {
-	rows, err := this.DB.Query("select * from books")
+	rows, err := this.DB.Query("SELECT * FROM " + tableName)
 	if err != nil {
 		log.Fatal("Failed to execute query: ", err)
 	}
@@ -38,22 +40,20 @@ func (this BooksDatabaseImpl) GetBooks() ([]*model.Book, error) {
 	return books, nil
 }
 
-func (this BooksDatabaseImpl) GetBook(id int) (model.Book, error) {
+func (this BooksDatabaseImpl) GetBook(id string) (model.Book, error) {
 	var book model.Book
-	query := "select * from books where id = $1"
+	query := "SELECT * FROM " + tableName + " WHERE id = $1"
 
 	err := this.DB.QueryRow(query, id).Scan(&book.Id, &book.Title, &book.Price)
 	if err != nil {
-		log.Println("No result to get specific book, err: %s", err)
+		log.Println("No result to get specific book, err: ", err)
 	}
 
 	return book, err
 }
 
 func (this BooksDatabaseImpl) CreateBook(book model.Book) error {
-	query := `
-	INSERT INTO books (id, title, price)
-	VALUES ($1, $2, $3)`
+	query := "INSERT INTO " + tableName + "(id, title, price) VALUES ($1, $2, $3)"
 	_, err := this.DB.Exec(query, book.Id, book.Title, book.Price)
 	if err != nil {
 		return err
@@ -63,7 +63,7 @@ func (this BooksDatabaseImpl) CreateBook(book model.Book) error {
 }
 
 func (this BooksDatabaseImpl) DeleteBook(id int) error {
-	query := "DELETE FROM books WHERE id = $1"
+	query := "DELETE FROM " + tableName + " WHERE id = $1"
 	res, err := this.DB.Exec(query, id)
 	if err != nil {
 		return err
@@ -78,6 +78,20 @@ func (this BooksDatabaseImpl) DeleteBook(id int) error {
 		return errors.New("Not found.")
 	}
 
-	// todo return deleted book?
+	return nil
+}
+
+func (this BooksDatabaseImpl) PutBook(book model.Book) error {
+	book, err := this.GetBook(book.Id)
+	if err != nil {
+		return err
+	}
+
+	query := "UPDATE " + tableName + " SET title = $1, price = $2 WHERE id = $3"
+	_, err = this.DB.Exec(query, book.Title, book.Price, book.Id)
+	if err != nil {
+		return err
+	}
+
 	return nil
 }

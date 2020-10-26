@@ -39,7 +39,7 @@
 			"response": []
 		},
 		{
-			"name": "Post book Copy",
+			"name": "Post book",
 			"event": [
 				{
 					"listen": "test",
@@ -77,6 +77,51 @@
 					"port": "3000",
 					"path": [
 						"books"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Put book",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "b8bd3100-796a-4c2d-a533-50be55ece5cb",
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"title\": \"Test update\",\n\t\"price\": 10\n}"
+				},
+				"url": {
+					"raw": "http://localhost:3000/books/1712",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"books",
+						"1712"
 					]
 				}
 			},

@@ -11,7 +11,7 @@ import (
 func main() {
 	database, err := db.InitializeDatabaseConnection()
 	if err != nil {
-		log.Fatal("Database connection failed: %s", err.Error())
+		log.Fatal("Database connection failed: ", err.Error())
 	} else {
 		log.Println("Database connection succeed")
 	}

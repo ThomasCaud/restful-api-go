@@ -33,13 +33,8 @@ func GetBooks(app *App) func(w http.ResponseWriter, r *http.Request) {
 func GetBook(app *App) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		vars := mux.Vars(r)
-		id, err := strconv.Atoi(vars["id"])
-		if err != nil {
-			http.Error(w, "Id must be an integer.", http.StatusBadRequest)
-			return
-		}
+		book, err := app.BooksDatabase.GetBook(vars["id"])
 
-		book, err := app.BooksDatabase.GetBook(id)
 		if err != nil {
 			http.Error(w, "Not found.", http.StatusNotFound)
 			return
@@ -87,27 +82,21 @@ func DeleteBook(app *App) func(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-/*
-func Put(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-	id := vars["id"]
+func PutBook(app *App) func(w http.ResponseWriter, r *http.Request) {
+	return func(w http.ResponseWriter, r *http.Request) {
+		reqBody, _ := ioutil.ReadAll(r.Body)
+		var updatedBook model.Book
+		json.Unmarshal(reqBody, &updatedBook)
 
-	reqBody, _ := ioutil.ReadAll(r.Body)
+		vars := mux.Vars(r)
+		updatedBook.Id = vars["id"]
 
-	var newBook model.Book
-	json.Unmarshal(reqBody, &newBook)
-
-	found := false
-	for index, book := range Books {
-		if book.Id == id {
-			Books[index].Title = newBook.Title
-			Books[index].Price = newBook.Price
-			found = true
+		err := app.BooksDatabase.PutBook(updatedBook)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
 		}
-	}
 
-	if !found {
-		http.NotFound(w, r)
+		json.NewEncoder(w).Encode(updatedBook)
 	}
 }
-*/

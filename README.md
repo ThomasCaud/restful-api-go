@@ -17,3 +17,6 @@ Learnings Go concepts using the classical Book API: Dockerized and tested API, c
 ```
 #cp docker-compose.override.yml.dist docker-compose.override.yml
 ```
+
+
+Change id to uuid
