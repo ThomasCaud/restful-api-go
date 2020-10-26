@@ -1,9 +1,15 @@
 version: '3'
 services:
+  app:
+    environment:
+      DB_USER: ~
+      DB_PASSWORD: ~
+      DB_NAME: ~
+      DB_TYPE: postgres
   db:
     ports:
       - "3306:3306"
     environment:
-      POSTGRES_USER: user
-      POSTGRES_PASSWORD: pass
-      POSTGRES_DB: bookstore
+      POSTGRES_USER: ~
+      POSTGRES_PASSWORD: ~
+      POSTGRES_DB: ~

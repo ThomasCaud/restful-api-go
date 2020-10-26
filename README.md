@@ -2,9 +2,9 @@
 Learnings Go concepts using the classical Book API: Dockerized and tested API, connected to database, with logs and authent management...
 
 - ✓ Manage CRUD
-- ✓ Dockerize API
-- ✓ Dockerize database
-- Use database (read var env from https://github.com/victorsteven/Dockerized-Golang-Postgres-Mysql-API/blob/master/api/server.go)
+- ✓ Dockerize the API
+- ✓ Dockerize a database
+- ✓ Use this database from API
 - Generate swagger
 - e2e testing
 - Keep HTTP calls logs
@@ -18,5 +18,6 @@ Learnings Go concepts using the classical Book API: Dockerized and tested API, c
 #cp docker-compose.override.yml.dist docker-compose.override.yml
 ```
 
-
 Change id to uuid
+Validators
+Fix interface (BooksDatabase is useless ; main should use it)
