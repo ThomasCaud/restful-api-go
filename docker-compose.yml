@@ -4,14 +4,19 @@ services:
     build:
       context: .
       dockerfile: docker/web/Dockerfile
-    container_name: app.dev
     volumes:
         - .:/go/src/api
     working_dir: /go/src/api
     tty: true
     ports:
       - "3000:3000"
+    environment:
+      DEBUG: 'true'
+    restart: always
+    depends_on:
+      - db
   db:
     image: postgres
+    container_name: api_db
     volumes:
       - ./initdb.sql:/docker-entrypoint-initdb.d/initdb.sql
