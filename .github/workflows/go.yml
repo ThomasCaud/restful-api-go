@@ -10,7 +10,7 @@ jobs:
 
   build:
     name: Build
-    runs-on: golang:1.15.2
+    runs-on: ubuntu-latest
     steps:
 
     - name: Set up Go 1.x
@@ -23,19 +23,6 @@ jobs:
 
     - name: Run go-mnd
       uses: tommy-muehle/go-mnd@master
-
-    - name: Get dependencies
-      run: |
-        echo $GOPATH
-        pwd
-        go get -v -t -d ./...
-        if [ -f Gopkg.toml ]; then
-            curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
-            dep ensure
-        fi
-
-    - name: Build
-      run: go build -v .
 
     - name: Test
       run: go test -v .
