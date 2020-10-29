@@ -23,9 +23,11 @@ jobs:
 
     - name: Run go-mnd
       uses: tommy-muehle/go-mnd@master
-      
+
     - name: Get dependencies
       run: |
+        echo $GOPATH
+        pwd
         go get -v -t -d ./...
         if [ -f Gopkg.toml ]; then
             curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
