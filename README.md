@@ -6,6 +6,7 @@ Learnings Go concepts using the classical Book API: Dockerized and tested API, c
 - ✓ Dockerize a database
 - ✓ Use this database from API
 - ✓ Use UUID
+- ✓ Setup CI
 - Manage migrations
 - Generate swagger
 - Manage validator differently
