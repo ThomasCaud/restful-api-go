@@ -6,12 +6,12 @@ Learnings Go concepts using the classical Book API: Dockerized and tested API, c
 - ✓ Dockerize a database
 - ✓ Use this database from API
 - ✓ Use UUID
+- ✓ Better handler and validator management (-> using Gin & Tonic)
+- Use juju/errors
 - Manage migrations
 - Generate swagger
-- Manage validator differently
 - IP e2e testing
 - Keep HTTP calls logs
-- Use juju/errors
 - Broker using
 - Manage authent
 - Context
