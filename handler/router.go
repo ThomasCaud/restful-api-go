@@ -1,10 +1,10 @@
 package handler
 
 import (
-	"net/http"
-
 	"github.com/ThomasCaud/go-rest-api/db"
-	"github.com/gorilla/mux"
+	"github.com/loopfz/gadgeto/tonic"
+
+	"github.com/gin-gonic/gin"
 )
 
 type App struct {
@@ -13,16 +13,17 @@ type App struct {
 
 type Handler struct {
 	path   string
-	f      func(http.ResponseWriter, *http.Request)
+	f      interface{}
 	method string
+	status int
 }
 
-func GetRouter(app *App) *mux.Router {
-	router := mux.NewRouter().StrictSlash(true)
+func GetRouter(app *App) *gin.Engine {
+	router := gin.Default()
 
 	booksHandlers := GetBooksHandlers(app)
 	for _, handler := range booksHandlers {
-		router.HandleFunc(handler.path, handler.f).Methods(handler.method)
+		router.Handle(handler.method, handler.path, tonic.Handler(handler.f, handler.status))
 	}
 
 	return router

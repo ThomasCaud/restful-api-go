@@ -41,11 +41,16 @@ func (this BooksDatabaseImpl) GetBooks() ([]*model.Book, error) {
 	return books, nil
 }
 
-func (this BooksDatabaseImpl) GetBook(id uuid.UUID) (model.Book, error) {
+func (this BooksDatabaseImpl) GetBook(id string) (model.Book, error) {
+	uuid, err := uuid.Parse(id)
+	if err != nil {
+		return model.Book{}, err
+	}
+
 	var book model.Book
 	query := "SELECT * FROM " + tableName + " WHERE id = $1"
 
-	err := this.DB.QueryRow(query, id).Scan(&book.Id, &book.Title, &book.Price)
+	err = this.DB.QueryRow(query, uuid).Scan(&book.Id, &book.Title, &book.Price)
 	if err != nil {
 		log.Println("No result to get specific book, err: ", err)
 	}
@@ -63,7 +68,7 @@ func (this BooksDatabaseImpl) CreateBook(book model.Book) error {
 	return nil
 }
 
-func (this BooksDatabaseImpl) DeleteBook(id uuid.UUID) error {
+func (this BooksDatabaseImpl) DeleteBook(id string) error {
 	query := "DELETE FROM " + tableName + " WHERE id = $1"
 	res, err := this.DB.Exec(query, id)
 	if err != nil {
@@ -83,7 +88,7 @@ func (this BooksDatabaseImpl) DeleteBook(id uuid.UUID) error {
 }
 
 func (this BooksDatabaseImpl) PutBook(book model.Book) error {
-	book, err := this.GetBook(book.Id)
+	book, err := this.GetBook(book.Id.String())
 	if err != nil {
 		return err
 	}

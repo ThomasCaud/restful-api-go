@@ -2,12 +2,12 @@ package handler
 
 import (
 	"encoding/json"
+	"errors"
 	"io/ioutil"
-	"net/http"
 
 	"github.com/ThomasCaud/go-rest-api/model"
+	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
-	"github.com/gorilla/mux"
 )
 
 type BooksDatabase interface {
@@ -18,114 +18,104 @@ type BooksDatabase interface {
 
 var Books []model.Book
 
+type UuidInput struct {
+	Id string `path:"id" validate:"required" description:"UUID"`
+}
+
+type BookOutput struct {
+	Uuid  uuid.UUID `json:"id"`
+	Title string    `json:"title"`
+	Price int       `json:"price"`
+}
+
 func GetBooksHandlers(app *App) []Handler {
 	return []Handler{
-		{"/books", getCollection(app), "GET"},
-		{"/books", create(app), "POST"},
-		{"/books/{id}", delete(app), "DELETE"},
-		{"/books/{id}", put(app), "PUT"},
-		{"/books/{id}", getItem(app), "GET"},
+		{"/books", getCollection(app), "GET", 200},
+		{"/books", create(app), "POST", 201},
+		{"/books/:id", delete(app), "DELETE", 204},
+		{"/books/:id", put(app), "PUT", 200},
+		{"/books/:id", getItem(app), "GET", 200},
 	}
 }
 
-func getUuidFromVar(w http.ResponseWriter, r *http.Request) (uuid.UUID, error) {
-	vars := mux.Vars(r)
-	id, err := uuid.Parse(vars["id"])
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-	}
-	return id, err
-}
-
-func getCollection(app *App) func(w http.ResponseWriter, r *http.Request) {
-	return func(w http.ResponseWriter, r *http.Request) {
+func getCollection(app *App) func(c *gin.Context) ([]BookOutput, error) {
+	return func(c *gin.Context) ([]BookOutput, error) {
 		books, err := app.BooksDatabase.GetBooks()
 		if err != nil {
-			http.Error(w, err.Error(), http.StatusBadRequest)
-			return
+			return nil, errors.New("Error while getting books.")
 		}
 
-		json.NewEncoder(w).Encode(books)
+		booksOuput := []BookOutput{}
+		for _, book := range books {
+			booksOuput = append(booksOuput, BookOutput{book.Id, book.Title, book.Price})
+		}
+
+		return booksOuput, nil
 	}
 }
 
-func getItem(app *App) func(w http.ResponseWriter, r *http.Request) {
-	return func(w http.ResponseWriter, r *http.Request) {
-		id, err := getUuidFromVar(w, r)
-		if err != nil {
-			return
-		}
-
-		book, err := app.BooksDatabase.GetBook(id)
+func getItem(app *App) func(c *gin.Context, in *UuidInput) (*BookOutput, error) {
+	return func(c *gin.Context, in *UuidInput) (*BookOutput, error) {
+		book, err := app.BooksDatabase.GetBook(in.Id)
 
 		if err != nil {
-			http.Error(w, "Not found.", http.StatusNotFound)
-			return
+			return nil, errors.New("Not found.")
 		}
 
-		json.NewEncoder(w).Encode(book)
+		return &BookOutput{book.Id, book.Title, book.Price}, nil
 	}
 }
 
-func create(app *App) func(w http.ResponseWriter, r *http.Request) {
-	return func(w http.ResponseWriter, r *http.Request) {
-		reqBody, _ := ioutil.ReadAll(r.Body)
+func create(app *App) func(c *gin.Context) (*BookOutput, error) {
+	return func(c *gin.Context) (*BookOutput, error) {
+		reqBody, _ := ioutil.ReadAll(c.Request.Body)
 		var book model.Book
 		json.Unmarshal(reqBody, &book)
 
 		id, err := uuid.NewRandom()
 		if err != nil {
-			http.Error(w, err.Error(), 400)
-			return
+			return nil, errors.New("Error while generating random UUID.")
 		}
 		book.Id = id
 
 		err = app.BooksDatabase.CreateBook(book)
 		if err != nil {
-			http.Error(w, err.Error(), 400)
-			return
+			return nil, errors.New("Error while saving the book.")
 		}
 
-		w.WriteHeader(http.StatusCreated)
-		json.NewEncoder(w).Encode(book)
+		return &BookOutput{book.Id, book.Title, book.Price}, nil
 	}
 }
 
-func delete(app *App) func(w http.ResponseWriter, r *http.Request) {
-	return func(w http.ResponseWriter, r *http.Request) {
-		id, err := getUuidFromVar(w, r)
+func delete(app *App) func(c *gin.Context, in *UuidInput) error {
+	return func(c *gin.Context, in *UuidInput) error {
+
+		err := app.BooksDatabase.DeleteBook(in.Id)
 		if err != nil {
-			return
+			return errors.New("Not found.")
 		}
 
-		err = app.BooksDatabase.DeleteBook(id)
-		if err != nil {
-			http.Error(w, "Not found.", http.StatusNotFound)
-			return
-		}
-
-		w.WriteHeader(http.StatusNoContent)
+		return nil
 	}
 }
 
-func put(app *App) func(w http.ResponseWriter, r *http.Request) {
-	return func(w http.ResponseWriter, r *http.Request) {
-		reqBody, _ := ioutil.ReadAll(r.Body)
+func put(app *App) func(c *gin.Context, in *UuidInput) (*BookOutput, error) {
+	return func(c *gin.Context, in *UuidInput) (*BookOutput, error) {
+		reqBody, _ := ioutil.ReadAll(c.Request.Body)
 		var updatedBook model.Book
 		json.Unmarshal(reqBody, &updatedBook)
 
-		id, err := getUuidFromVar(w, r)
+		uuid, err := uuid.Parse(in.Id)
 		if err != nil {
-			return
+			return nil, errors.New("Invalid UUID provided.")
 		}
-		updatedBook.Id = id
+		updatedBook.Id = uuid
 
 		err = app.BooksDatabase.PutBook(updatedBook)
 		if err != nil {
-			http.Error(w, err.Error(), http.StatusBadRequest)
-			return
+			return nil, errors.New("Error while updating book.")
 		}
 
-		json.NewEncoder(w).Encode(updatedBook)
+		return &BookOutput{updatedBook.Id, updatedBook.Title, updatedBook.Price}, nil
 	}
 }
