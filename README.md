@@ -6,18 +6,28 @@ Learnings Go concepts using the classical Book API: Dockerized and tested API, c
 - ✓ Dockerize a database
 - ✓ Use this database from API
 - ✓ Use UUID
-- ✓ Better handler and validator management (-> using Gin & Tonic)
+- ✓ Better handler and validator management using Gin & Tonic
 - ✓ Setup CI
-- Use juju/errors
+- ✓ Improve integrations tests using ovh/venom
+- ✓ Use juju/errors
+- ✓ Generate swagger
 - Manage migrations
-- Generate swagger
-- IP e2e testing
 - Keep HTTP calls logs
 - Broker using
 - Manage authent
-- Context
 
 # To make it work
 ```
 #cp docker-compose.override.yml.dist docker-compose.override.yml
+```
+
+# To launch tests
+```
+#cd tests/venom
+#venom run
+```
+
+# Swagger
+```
+Go to /swagger.json
 ```

@@ -1,13 +1,10 @@
 package handler
 
 import (
-	"encoding/json"
-	"errors"
-	"io/ioutil"
-
 	"github.com/ThomasCaud/go-rest-api/model"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
+	"github.com/juju/errors"
 )
 
 type BooksDatabase interface {
@@ -18,15 +15,28 @@ type BooksDatabase interface {
 
 var Books []model.Book
 
-type UuidInput struct {
-	Id string `path:"id" validate:"required" description:"UUID"`
-}
+type (
+	UuidInput struct {
+		Id string `path:"id" validate:"required" description:"UUID"`
+	}
 
-type BookOutput struct {
-	Uuid  uuid.UUID `json:"id"`
-	Title string    `json:"title"`
-	Price int       `json:"price"`
-}
+	BookPostInput struct {
+		Title string `json:"title" validate:"required"`
+		Price int    `json:"price" validate:"required,gt=0"`
+	}
+
+	BookPutInput struct {
+		UuidInput
+		Title string `json:"title" validate:"required"`
+		Price int    `json:"price" validate:"required,gt=0"`
+	}
+
+	BookOutput struct {
+		Uuid  uuid.UUID `json:"id"`
+		Title string    `json:"title"`
+		Price int       `json:"price"`
+	}
+)
 
 func GetBooksHandlers(app *App) []Handler {
 	return []Handler{
@@ -59,28 +69,24 @@ func getItem(app *App) func(c *gin.Context, in *UuidInput) (*BookOutput, error) 
 		book, err := app.BooksDatabase.GetBook(in.Id)
 
 		if err != nil {
-			return nil, errors.New("Not found.")
+			return nil, errors.NewNotFound(nil, "Book not found.")
 		}
 
 		return &BookOutput{book.Id, book.Title, book.Price}, nil
 	}
 }
 
-func create(app *App) func(c *gin.Context) (*BookOutput, error) {
-	return func(c *gin.Context) (*BookOutput, error) {
-		reqBody, _ := ioutil.ReadAll(c.Request.Body)
-		var book model.Book
-		json.Unmarshal(reqBody, &book)
-
+func create(app *App) func(c *gin.Context, in *BookPostInput) (*BookOutput, error) {
+	return func(c *gin.Context, in *BookPostInput) (*BookOutput, error) {
 		id, err := uuid.NewRandom()
 		if err != nil {
-			return nil, errors.New("Error while generating random UUID.")
+			return nil, errors.Errorf("Error while generating UUID.")
 		}
-		book.Id = id
+		book := model.Book{Id: id, Title: in.Title, Price: in.Price}
 
 		err = app.BooksDatabase.CreateBook(book)
 		if err != nil {
-			return nil, errors.New("Error while saving the book.")
+			return nil, errors.Errorf("Error while generating UUID.")
 		}
 
 		return &BookOutput{book.Id, book.Title, book.Price}, nil
@@ -89,29 +95,24 @@ func create(app *App) func(c *gin.Context) (*BookOutput, error) {
 
 func delete(app *App) func(c *gin.Context, in *UuidInput) error {
 	return func(c *gin.Context, in *UuidInput) error {
-
-		err := app.BooksDatabase.DeleteBook(in.Id)
+		_, err := app.BooksDatabase.GetBook(in.Id)
 		if err != nil {
-			return errors.New("Not found.")
+			return errors.NewNotFound(nil, "Book not found")
 		}
 
+		err = app.BooksDatabase.DeleteBook(in.Id)
+		if err != nil {
+			return errors.New("Error while deleting book.")
+		}
 		return nil
 	}
 }
 
-func put(app *App) func(c *gin.Context, in *UuidInput) (*BookOutput, error) {
-	return func(c *gin.Context, in *UuidInput) (*BookOutput, error) {
-		reqBody, _ := ioutil.ReadAll(c.Request.Body)
-		var updatedBook model.Book
-		json.Unmarshal(reqBody, &updatedBook)
+func put(app *App) func(c *gin.Context, in *BookPutInput) (*BookOutput, error) {
+	return func(c *gin.Context, in *BookPutInput) (*BookOutput, error) {
+		updatedBook := model.Book{Id: uuid.MustParse(in.Id), Title: in.Title, Price: in.Price}
 
-		uuid, err := uuid.Parse(in.Id)
-		if err != nil {
-			return nil, errors.New("Invalid UUID provided.")
-		}
-		updatedBook.Id = uuid
-
-		err = app.BooksDatabase.PutBook(updatedBook)
+		err := app.BooksDatabase.PutBook(updatedBook)
 		if err != nil {
 			return nil, errors.New("Error while updating book.")
 		}
