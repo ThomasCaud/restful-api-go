@@ -1,14 +1,14 @@
 name: /books tests
 vars:
-    endpoint: 'http://localhost:3000/books/' #todo use it
-    endpointBookUuid: '010242be-bfca-4bf0-96e6-174fd79f8cd8'
+    endpoint: 'http://localhost:3000/books/'
+    inexistantBookUuid: '010242be-bfca-4bf0-96e6-174fd79f8cd8'
 
 testcases:
 - name: GET collection
   steps:
   - type: http
     method: GET
-    url: 'http://localhost:3000/books'
+    url: '{{.endpoint}}'
     assertions:
     - result.statuscode ShouldEqual 200
     - result.bodyjson.__type__ ShouldEqual Array
@@ -18,7 +18,7 @@ testcases:
   steps:
     - type: http
       method: POST
-      url: 'http://localhost:3000/books'
+      url: '{{.endpoint}}'
       body: '{"title": "testTitle", "price": 1712}'
       assertions:
         - result.statuscode ShouldEqual 201
@@ -27,28 +27,28 @@ testcases:
         - result.bodyjson.price ShouldEqual 1712
     - type: http
       method: POST
-      url: 'http://localhost:3000/books'
+      url: '{{.endpoint}}'
       body: '{"title": "testTitle"}'
       assertions:
         - result.statuscode ShouldEqual 400
     - type: http
       method: POST
-      url: 'http://localhost:3000/books'
+      url: '{{.endpoint}}'
       body: '{"price": 5}'
       assertions:
         - result.statuscode ShouldEqual 400
     - type: http
       method: POST
-      url: 'http://localhost:3000/books'
+      url: '{{.endpoint}}'
       body: '{"price": "badPrice"}'
       assertions:
         - result.statuscode ShouldEqual 400
 
-- name: GET
+- name: GET item
   steps:
     - type: http
       method: GET
-      url: http://localhost:3000/books/{{.POST.result.bodyjson.id}}
+      url: '{{.endpoint}}{{.POST.result.bodyjson.id}}'
       assertions:
         - result.statuscode ShouldEqual 200
         - result.bodyjson.__type__ ShouldEqual Map
@@ -57,7 +57,7 @@ testcases:
         - result.bodyjson.price ShouldEqual 1712
     - type: http
       method: GET
-      url: http://localhost:3000/books/{{.endpointBookUuid}}
+      url: '{{.endpoint}}{{.inexistantBookUuid}}'
       assertions:
         - result.statuscode ShouldEqual 404
 
@@ -65,7 +65,7 @@ testcases:
   steps:
     - type: http
       method: PUT
-      url: http://localhost:3000/books/{{.POST.result.bodyjson.id}}
+      url: '{{.endpoint}}{{.POST.result.bodyjson.id}}'
       body: '{"title": "testPutTitle", "price": 100}'
       assertions:
         - result.statuscode ShouldEqual 200
@@ -77,11 +77,11 @@ testcases:
   steps:
     - type: http
       method: DELETE
-      url:  http://localhost:3000/books/{{.POST.result.bodyjson.id}}
+      url: '{{.endpoint}}{{.POST.result.bodyjson.id}}'
       assertions:
         - result.statuscode ShouldEqual 204
     - type: http
       method: DELETE
-      url:  http://localhost:3000/books/{{.endpointBookUuid}}
+      url: '{{.endpoint}}{{.inexistantBookUuid}}'
       assertions:
         - result.statuscode ShouldEqual 404
