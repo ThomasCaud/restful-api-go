@@ -11,11 +11,11 @@ Learnings Go concepts using the classical Book API: Dockerized and tested API, c
 - ✓ Improve integrations tests using ovh/venom
 - ✓ Use juju/errors
 - ✓ Generate swagger
-- Manage migrations
+- Manage migrations neatly
 - Keep HTTP calls logs
-- Broker using
-- How to manage pagination ?
-- Manage authent
+- Add Broker message using
+- How to manage pagination?
+- Manage authentication
 
 # To make it work
 ```
