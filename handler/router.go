@@ -22,6 +22,7 @@ type Handler struct {
 
 func GetRouter(app *App) *gin.Engine {
 	router := gin.Default()
+	router.GET("/swagger.json", swag.Swagger(router, "Books API", swag.Version("v1.0")))
 
 	tonic.SetErrorHook(jujerr.ErrHook)
 	booksHandlers := GetBooksHandlers(app)
@@ -29,7 +30,6 @@ func GetRouter(app *App) *gin.Engine {
 	for _, handler := range booksHandlers {
 		router.Handle(handler.method, handler.path, tonic.Handler(handler.f, handler.status))
 	}
-	router.GET("/swagger.json", swag.Swagger(router, "Books API", swag.Version("v1.0")))
 
 	return router
 }

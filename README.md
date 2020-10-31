@@ -14,6 +14,7 @@ Learnings Go concepts using the classical Book API: Dockerized and tested API, c
 - Manage migrations
 - Keep HTTP calls logs
 - Broker using
+- How to manage pagination ?
 - Manage authent
 
 # To make it work
