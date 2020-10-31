@@ -21,6 +21,8 @@ Learnings Go concepts using the classical Book API: Dockerized and tested API, c
 ```
 #cp docker-compose.override.yml.dist docker-compose.override.yml
 ```
+Prerecommit hook is setting up, using [pre-commit](https://pre-commit.com/)
+
 
 # To launch tests
 ```
