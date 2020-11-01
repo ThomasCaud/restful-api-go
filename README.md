@@ -25,15 +25,15 @@ Learnings Go concepts using the classical Book API: Dockerized and tested API, c
 
 # To make it work
 ```
-#cp docker-compose.override.yml.dist docker-compose.override.yml
+$ cp docker-compose.override.yml.dist docker-compose.override.yml
 ```
 Prerecommit hook is setting up, using [pre-commit](https://pre-commit.com/)
 
 
 # To launch tests
 ```
-#cd tests/venom
-#venom run
+$ cd tests/venom
+$ venom run
 ```
 
 # Swagger
