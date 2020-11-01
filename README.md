@@ -1,4 +1,5 @@
 [![Go Report Card](https://goreportcard.com/badge/github.com/ThomasCaud/restful-api-go)](https://goreportcard.com/report/github.com/ThomasCaud/restful-api-go)
+![Go](https://github.com/ThomasCaud/restful-api-go/workflows/Go/badge.svg)
 
 # Learning roadmap
 Learnings Go concepts using the classical Book API: Dockerized and tested API, connected to database, with logs and authent management...
