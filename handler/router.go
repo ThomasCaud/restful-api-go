@@ -9,10 +9,12 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// App contain data and functions to make the app works
 type App struct {
 	BooksDatabase db.BooksDatabaseImpl
 }
 
+// Handler is the expected struct of an HTTP call handler
 type Handler struct {
 	path   string
 	f      interface{}
@@ -20,6 +22,7 @@ type Handler struct {
 	status int
 }
 
+// GetRouter return gin router for the full API
 func GetRouter(app *App) *gin.Engine {
 	router := gin.Default()
 	router.GET("/swagger.json", swag.Swagger(router, "Books API", swag.Version("v1.0")))

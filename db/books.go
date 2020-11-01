@@ -9,14 +9,16 @@ import (
 	"github.com/google/uuid"
 )
 
+// BooksDatabaseImpl contain direct access to the DB
 type BooksDatabaseImpl struct {
 	DB *sql.DB
 }
 
 const tableName = "books"
 
-func (this BooksDatabaseImpl) GetBooks() ([]*model.Book, error) {
-	rows, err := this.DB.Query("SELECT * FROM " + tableName)
+// GetBooks return all books
+func (dbImpl BooksDatabaseImpl) GetBooks() ([]*model.Book, error) {
+	rows, err := dbImpl.DB.Query("SELECT * FROM " + tableName)
 	if err != nil {
 		log.Fatal("Failed to execute query: ", err)
 	}
@@ -25,7 +27,7 @@ func (this BooksDatabaseImpl) GetBooks() ([]*model.Book, error) {
 	books := make([]*model.Book, 0)
 	for rows.Next() {
 		book := new(model.Book)
-		err := rows.Scan(&book.Id, &book.Title, &book.Price)
+		err := rows.Scan(&book.ID, &book.Title, &book.Price)
 
 		if err != nil {
 			return nil, err
@@ -41,7 +43,8 @@ func (this BooksDatabaseImpl) GetBooks() ([]*model.Book, error) {
 	return books, nil
 }
 
-func (this BooksDatabaseImpl) GetBook(id string) (model.Book, error) {
+// GetBook return book with the parameter id, error otherwise
+func (dbImpl BooksDatabaseImpl) GetBook(id string) (model.Book, error) {
 	uuid, err := uuid.Parse(id)
 	if err != nil {
 		return model.Book{}, err
@@ -50,7 +53,7 @@ func (this BooksDatabaseImpl) GetBook(id string) (model.Book, error) {
 	var book model.Book
 	query := "SELECT * FROM " + tableName + " WHERE id = $1"
 
-	err = this.DB.QueryRow(query, uuid).Scan(&book.Id, &book.Title, &book.Price)
+	err = dbImpl.DB.QueryRow(query, uuid).Scan(&book.ID, &book.Title, &book.Price)
 	if err != nil {
 		log.Println("No result to get specific book, err: ", err)
 	}
@@ -58,9 +61,10 @@ func (this BooksDatabaseImpl) GetBook(id string) (model.Book, error) {
 	return book, err
 }
 
-func (this BooksDatabaseImpl) CreateBook(book model.Book) error {
+// CreateBook create book using book parameter
+func (dbImpl BooksDatabaseImpl) CreateBook(book model.Book) error {
 	query := "INSERT INTO " + tableName + "(id, title, price) VALUES ($1, $2, $3)"
-	_, err := this.DB.Exec(query, book.Id, book.Title, book.Price)
+	_, err := dbImpl.DB.Exec(query, book.ID, book.Title, book.Price)
 	if err != nil {
 		return err
 	}
@@ -68,9 +72,10 @@ func (this BooksDatabaseImpl) CreateBook(book model.Book) error {
 	return nil
 }
 
-func (this BooksDatabaseImpl) DeleteBook(id string) error {
+// DeleteBook delete the book corresponding to the giving ID parameter
+func (dbImpl BooksDatabaseImpl) DeleteBook(id string) error {
 	query := "DELETE FROM " + tableName + " WHERE id = $1"
-	res, err := this.DB.Exec(query, id)
+	res, err := dbImpl.DB.Exec(query, id)
 	if err != nil {
 		return err
 	}
@@ -81,20 +86,21 @@ func (this BooksDatabaseImpl) DeleteBook(id string) error {
 	}
 
 	if count == 0 {
-		return errors.New("Not found.")
+		return errors.New("Not found")
 	}
 
 	return nil
 }
 
-func (this BooksDatabaseImpl) PutBook(book model.Book) error {
-	book, err := this.GetBook(book.Id.String())
+// PutBook update the book
+func (dbImpl BooksDatabaseImpl) PutBook(book model.Book) error {
+	book, err := dbImpl.GetBook(book.ID.String())
 	if err != nil {
 		return err
 	}
 
 	query := "UPDATE " + tableName + " SET title = $1, price = $2 WHERE id = $3"
-	_, err = this.DB.Exec(query, book.Title, book.Price, book.Id)
+	_, err = dbImpl.DB.Exec(query, book.Title, book.Price, book.ID)
 	if err != nil {
 		return err
 	}

@@ -7,37 +7,37 @@ import (
 	"github.com/juju/errors"
 )
 
+// BooksDatabase interface contains function to call in order to get data from an "abstract" database
 type BooksDatabase interface {
 	GetBooks() ([]model.Book, error)
 	GetBook() (model.Book, error)
 	DeleteBook() (model.Book, error)
 }
 
-var Books []model.Book
-
 type (
-	UuidInput struct {
-		Id string `path:"id" validate:"required" description:"UUID"`
+	uuidInput struct {
+		ID string `path:"id" validate:"required" description:"UUID"`
 	}
 
-	BookPostInput struct {
+	bookPostInput struct {
 		Title string `json:"title" validate:"required"`
 		Price int    `json:"price" validate:"required,gt=0"`
 	}
 
-	BookPutInput struct {
-		UuidInput
+	bookPutInput struct {
+		uuidInput
 		Title string `json:"title" validate:"required"`
 		Price int    `json:"price" validate:"required,gt=0"`
 	}
 
-	BookOutput struct {
-		Uuid  uuid.UUID `json:"id"`
+	bookOutput struct {
+		UUID  uuid.UUID `json:"id"`
 		Title string    `json:"title"`
 		Price int       `json:"price"`
 	}
 )
 
+// GetBooksHandlers export books handlers
 func GetBooksHandlers(app *App) []Handler {
 	return []Handler{
 		{"/books", getCollection(app), "GET", 200},
@@ -48,75 +48,75 @@ func GetBooksHandlers(app *App) []Handler {
 	}
 }
 
-func getCollection(app *App) func(c *gin.Context) ([]BookOutput, error) {
-	return func(c *gin.Context) ([]BookOutput, error) {
+func getCollection(app *App) func(c *gin.Context) ([]bookOutput, error) {
+	return func(c *gin.Context) ([]bookOutput, error) {
 		books, err := app.BooksDatabase.GetBooks()
 		if err != nil {
-			return nil, errors.New("Error while getting books.")
+			return nil, errors.New("error while getting books")
 		}
 
-		booksOuput := []BookOutput{}
+		booksOuput := []bookOutput{}
 		for _, book := range books {
-			booksOuput = append(booksOuput, BookOutput{book.Id, book.Title, book.Price})
+			booksOuput = append(booksOuput, bookOutput{book.ID, book.Title, book.Price})
 		}
 
 		return booksOuput, nil
 	}
 }
 
-func getItem(app *App) func(c *gin.Context, in *UuidInput) (*BookOutput, error) {
-	return func(c *gin.Context, in *UuidInput) (*BookOutput, error) {
-		book, err := app.BooksDatabase.GetBook(in.Id)
+func getItem(app *App) func(c *gin.Context, in *uuidInput) (*bookOutput, error) {
+	return func(c *gin.Context, in *uuidInput) (*bookOutput, error) {
+		book, err := app.BooksDatabase.GetBook(in.ID)
 
 		if err != nil {
 			return nil, errors.NewNotFound(nil, "Book not found.")
 		}
 
-		return &BookOutput{book.Id, book.Title, book.Price}, nil
+		return &bookOutput{book.ID, book.Title, book.Price}, nil
 	}
 }
 
-func create(app *App) func(c *gin.Context, in *BookPostInput) (*BookOutput, error) {
-	return func(c *gin.Context, in *BookPostInput) (*BookOutput, error) {
+func create(app *App) func(c *gin.Context, in *bookPostInput) (*bookOutput, error) {
+	return func(c *gin.Context, in *bookPostInput) (*bookOutput, error) {
 		id, err := uuid.NewRandom()
 		if err != nil {
 			return nil, errors.Errorf("Error while generating UUID.")
 		}
-		book := model.Book{Id: id, Title: in.Title, Price: in.Price}
+		book := model.Book{ID: id, Title: in.Title, Price: in.Price}
 
 		err = app.BooksDatabase.CreateBook(book)
 		if err != nil {
 			return nil, errors.Errorf("Error while generating UUID.")
 		}
 
-		return &BookOutput{book.Id, book.Title, book.Price}, nil
+		return &bookOutput{book.ID, book.Title, book.Price}, nil
 	}
 }
 
-func delete(app *App) func(c *gin.Context, in *UuidInput) error {
-	return func(c *gin.Context, in *UuidInput) error {
-		_, err := app.BooksDatabase.GetBook(in.Id)
+func delete(app *App) func(c *gin.Context, in *uuidInput) error {
+	return func(c *gin.Context, in *uuidInput) error {
+		_, err := app.BooksDatabase.GetBook(in.ID)
 		if err != nil {
 			return errors.NewNotFound(nil, "Book not found")
 		}
 
-		err = app.BooksDatabase.DeleteBook(in.Id)
+		err = app.BooksDatabase.DeleteBook(in.ID)
 		if err != nil {
-			return errors.New("Error while deleting book.")
+			return errors.New("Error while deleting book")
 		}
 		return nil
 	}
 }
 
-func put(app *App) func(c *gin.Context, in *BookPutInput) (*BookOutput, error) {
-	return func(c *gin.Context, in *BookPutInput) (*BookOutput, error) {
-		updatedBook := model.Book{Id: uuid.MustParse(in.Id), Title: in.Title, Price: in.Price}
+func put(app *App) func(c *gin.Context, in *bookPutInput) (*bookOutput, error) {
+	return func(c *gin.Context, in *bookPutInput) (*bookOutput, error) {
+		updatedBook := model.Book{ID: uuid.MustParse(in.ID), Title: in.Title, Price: in.Price}
 
 		err := app.BooksDatabase.PutBook(updatedBook)
 		if err != nil {
-			return nil, errors.New("Error while updating book.")
+			return nil, errors.New("Error while updating book")
 		}
 
-		return &BookOutput{updatedBook.Id, updatedBook.Title, updatedBook.Price}, nil
+		return &bookOutput{updatedBook.ID, updatedBook.Title, updatedBook.Price}, nil
 	}
 }
