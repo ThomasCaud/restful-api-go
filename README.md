@@ -1,5 +1,6 @@
 [![Go Report Card](https://goreportcard.com/badge/github.com/ThomasCaud/restful-api-go)](https://goreportcard.com/report/github.com/ThomasCaud/restful-api-go)
 ![Go](https://github.com/ThomasCaud/restful-api-go/workflows/Go/badge.svg)
+[![Known Vulnerabilities](https://snyk.io/test/github/ThomasCaud/restful-api-go/badge.svg?targetFile=Gopkg.lock)](https://snyk.io/test/github/ThomasCaud/restful-api-go?targetFile=Gopkg.lock)
 
 # Learning roadmap
 Learnings Go concepts using the classical Book API: Dockerized and tested API, connected to database, with logs and authent management...
