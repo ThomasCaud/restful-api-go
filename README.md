@@ -9,13 +9,13 @@ Learnings Go concepts using the classical Book API: Dockerized and tested API, c
 - ✓ Dockerize the API
 - ✓ Dockerize a database
 - ✓ Use this database from API
-- ✓ Use UUID
-- ✓ Better handler and validator management using Gin & Tonic
+- ✓ Use UUID instead of integer
+- ✓ Better handler and validator management, using gin-gonic/gin & loopfz/gadgeto/tonic
 - ✓ Setup CI
-- ✓ Improve integrations tests using ovh/venom
+- ✓ Improve integrations tests, using ovh/venom
 - ✓ Use juju/errors
 - ✓ Generate swagger
-- Manage migrations neatly
+- ✓ Manage migrations neatly, using rubenv/sql-migrate
 - Keep HTTP calls logs
 - Add broker message using
 - Manage authentication

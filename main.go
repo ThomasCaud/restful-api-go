@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 	"net/http"
+	"time"
 
 	"github.com/ThomasCaud/go-rest-api/db"
 	"github.com/ThomasCaud/go-rest-api/handler"
@@ -14,6 +15,14 @@ func main() {
 		log.Fatal("Database connection failed: ", err.Error())
 	} else {
 		log.Println("Database connection succeed")
+	}
+
+	// Wait for db container to be ready
+	// todo wait via docker-compose
+	time.Sleep(3 * time.Second)
+	err = db.ExecuteMigrations(database)
+	if err != nil {
+		log.Fatal("Migrations failed: ", err.Error())
 	}
 
 	var booksDbImpl = db.BooksDatabaseImpl{}

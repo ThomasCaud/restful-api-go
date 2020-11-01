@@ -51,7 +51,7 @@ func (dbImpl BooksDatabaseImpl) GetBook(id string) (model.Book, error) {
 	}
 
 	var book model.Book
-	query := "SELECT * FROM " + tableName + " WHERE id = $1"
+	query := "SELECT * FROM " + tableName + " WHERE id = $1 LIMIT 100"
 
 	err = dbImpl.DB.QueryRow(query, uuid).Scan(&book.ID, &book.Title, &book.Price)
 	if err != nil {

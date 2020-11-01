@@ -4,11 +4,30 @@ import (
 	"database/sql"
 	"fmt"
 	"os"
+
+	// postgres driver
+	_ "github.com/lib/pq"
+
+	migrate "github.com/rubenv/sql-migrate"
 )
 
 // DB contain direct access to the DB
 type DB struct {
 	*sql.DB
+}
+
+// ExecuteMigrations get and execute migrations
+func ExecuteMigrations(db *sql.DB) error {
+	migrations := &migrate.FileMigrationSource{
+		Dir: "db/migrations",
+	}
+
+	n, err := migrate.Exec(db, os.Getenv("DB_TYPE"), migrations, migrate.Up)
+	if err != nil {
+		return err
+	}
+	fmt.Printf("Applied %d migrations!\n", n)
+	return nil
 }
 
 // InitializeDatabaseConnection try to connect to database
