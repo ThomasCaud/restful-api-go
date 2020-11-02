@@ -2,8 +2,8 @@ package postgres
 
 import (
 	"database/sql"
-	"errors"
-	"log"
+
+	"github.com/juju/errors"
 
 	"github.com/ThomasCaud/go-rest-api/model"
 )
@@ -15,15 +15,15 @@ type BooksDatabaseImpl struct {
 
 // GetBooks return all books
 func (dbImpl BooksDatabaseImpl) GetBooks() ([]*model.Book, error) {
-	rows, err := dbImpl.DB.Query("SELECT * FROM books")
+	rows, err := dbImpl.DB.Query("SELECT id, title, price FROM books")
 	if err != nil {
-		log.Fatal("Failed to execute query: ", err)
+		return nil, errors.Errorf("Failed to get books collection: %v", err)
 	}
 	defer rows.Close()
 
 	books := make([]*model.Book, 0)
 	for rows.Next() {
-		book := new(model.Book)
+		book := &model.Book{}
 		err := rows.Scan(&book.ID, &book.Title, &book.Price)
 
 		if err != nil {
@@ -42,12 +42,12 @@ func (dbImpl BooksDatabaseImpl) GetBooks() ([]*model.Book, error) {
 
 // GetBook return book with the parameter id, error otherwise
 func (dbImpl BooksDatabaseImpl) GetBook(id string) (*model.Book, error) {
-	query := "SELECT * FROM books WHERE id = $1 LIMIT 100"
+	query := "SELECT id, title, price FROM books WHERE id = $1"
 
 	book := model.Book{}
 	err := dbImpl.DB.QueryRow(query, id).Scan(&book.ID, &book.Title, &book.Price)
 	if err != nil {
-		log.Println("No result to get specific book, err: ", err)
+		return nil, errors.Errorf("No result to get specific book with id %v, err: %v", id, err)
 	}
 
 	return &book, err
@@ -57,6 +57,7 @@ func (dbImpl BooksDatabaseImpl) GetBook(id string) (*model.Book, error) {
 func (dbImpl BooksDatabaseImpl) CreateBook(book model.Book) error {
 	query := "INSERT INTO books (id, title, price) VALUES ($1, $2, $3)"
 	_, err := dbImpl.DB.Exec(query, book.ID, book.Title, book.Price)
+
 	if err != nil {
 		return err
 	}
@@ -68,6 +69,7 @@ func (dbImpl BooksDatabaseImpl) CreateBook(book model.Book) error {
 func (dbImpl BooksDatabaseImpl) DeleteBook(id string) error {
 	query := "DELETE FROM books WHERE id = $1"
 	res, err := dbImpl.DB.Exec(query, id)
+
 	if err != nil {
 		return err
 	}
@@ -78,7 +80,7 @@ func (dbImpl BooksDatabaseImpl) DeleteBook(id string) error {
 	}
 
 	if count == 0 {
-		return errors.New("Not found")
+		return errors.Errorf("Book with id %v not found (deleting process)", id)
 	}
 
 	return nil
@@ -94,6 +96,7 @@ func (dbImpl BooksDatabaseImpl) PutBook(book model.Book) error {
 
 	query := "UPDATE books SET title = $1, price = $2 WHERE id = $3"
 	_, err = dbImpl.DB.Exec(query, book.Title, book.Price, book.ID)
+
 	if err != nil {
 		return err
 	}
