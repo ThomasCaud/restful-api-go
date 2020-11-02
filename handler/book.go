@@ -2,12 +2,14 @@ package handler
 
 import (
 	"github.com/ThomasCaud/go-rest-api/model"
+	"github.com/ThomasCaud/go-rest-api/service"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"github.com/juju/errors"
 )
 
 // BooksDatabase interface contains function to call in order to get data from an "abstract" database
+// todo move this interface in service file
 type BooksDatabase interface {
 	GetBooks() ([]model.Book, error)
 	GetBook() (model.Book, error)
@@ -19,13 +21,7 @@ type (
 		ID string `path:"id" validate:"required" description:"UUID"`
 	}
 
-	bookPostInput struct {
-		Title string `json:"title" validate:"required"`
-		Price int    `json:"price" validate:"required,gt=0"`
-	}
-
-	bookPutInput struct {
-		uuidInput
+	titleAndPriceInput struct {
 		Title string `json:"title" validate:"required"`
 		Price int    `json:"price" validate:"required,gt=0"`
 	}
@@ -38,6 +34,7 @@ type (
 )
 
 // GetBooksHandlers export books handlers
+// todo remove this function
 func GetBooksHandlers(app *App) []Handler {
 	return []Handler{
 		{"/books", getCollection(app), "GET", 200},
@@ -48,11 +45,14 @@ func GetBooksHandlers(app *App) []Handler {
 	}
 }
 
+// nous sommes dans le package "handler"
 func getCollection(app *App) func(c *gin.Context) ([]bookOutput, error) {
 	return func(c *gin.Context) ([]bookOutput, error) {
-		books, err := app.BooksDatabase.GetBooks()
+
+		// une fonction qui appartient au package "service"
+		books, err := service.GetCollection(app.BooksDatabase)
 		if err != nil {
-			return nil, errors.New("error while getting books")
+			return nil, errors.New("Error while trying to get book collection")
 		}
 
 		booksOuput := []bookOutput{}
@@ -74,6 +74,10 @@ func getItem(app *App) func(c *gin.Context, in *uuidInput) (*bookOutput, error) 
 
 		return &bookOutput{book.ID, book.Title, book.Price}, nil
 	}
+}
+
+type bookPostInput struct {
+	titleAndPriceInput
 }
 
 func create(app *App) func(c *gin.Context, in *bookPostInput) (*bookOutput, error) {
@@ -106,6 +110,11 @@ func delete(app *App) func(c *gin.Context, in *uuidInput) error {
 		}
 		return nil
 	}
+}
+
+type bookPutInput struct {
+	uuidInput
+	titleAndPriceInput
 }
 
 func put(app *App) func(c *gin.Context, in *bookPutInput) (*bookOutput, error) {

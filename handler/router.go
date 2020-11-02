@@ -1,7 +1,7 @@
 package handler
 
 import (
-	"github.com/ThomasCaud/go-rest-api/db"
+	"github.com/ThomasCaud/go-rest-api/store/postgres"
 	"github.com/loopfz/gadgeto/tonic"
 	"github.com/loopfz/gadgeto/tonic/utils/jujerr"
 	"github.com/loopfz/gadgeto/tonic/utils/swag"
@@ -11,7 +11,7 @@ import (
 
 // App contain data and functions to make the app works
 type App struct {
-	BooksDatabase db.BooksDatabaseImpl
+	BooksDatabase postgres.BooksDatabaseImpl
 }
 
 // Handler is the expected struct of an HTTP call handler

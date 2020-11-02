@@ -1,4 +1,4 @@
-package db
+package store
 
 import (
 	"database/sql"
@@ -19,7 +19,7 @@ type DB struct {
 // ExecuteMigrations get and execute migrations
 func ExecuteMigrations(db *sql.DB) error {
 	migrations := &migrate.FileMigrationSource{
-		Dir: "db/migrations",
+		Dir: "store/migrations",
 	}
 
 	n, err := migrate.Exec(db, os.Getenv("DB_TYPE"), migrations, migrate.Up)
