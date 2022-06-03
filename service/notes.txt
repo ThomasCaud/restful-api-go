@@ -1,0 +1,2 @@
+Services utilisent store
+Ne connaît pas l'implémentation du store

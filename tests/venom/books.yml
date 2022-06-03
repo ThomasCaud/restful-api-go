@@ -1,0 +1,87 @@
+name: /books tests
+vars:
+    endpoint: 'http://localhost:3000/books/'
+    inexistantBookUuid: '010242be-bfca-4bf0-96e6-174fd79f8cd8'
+
+testcases:
+- name: GET collection
+  steps:
+  - type: http
+    method: GET
+    url: '{{.endpoint}}'
+    assertions:
+    - result.statuscode ShouldEqual 200
+    - result.bodyjson.__type__ ShouldEqual Array
+    - result.bodyjson.__len__ ShouldBeGreaterThanOrEqualTo 2
+
+- name: POST
+  steps:
+    - type: http
+      method: POST
+      url: '{{.endpoint}}'
+      body: '{"title": "testTitle", "price": 1712}'
+      assertions:
+        - result.statuscode ShouldEqual 201
+        - result.bodyjson.__type__ ShouldEqual Map
+        - result.bodyjson.title ShouldEqual testTitle
+        - result.bodyjson.price ShouldEqual 1712
+    - type: http
+      method: POST
+      url: '{{.endpoint}}'
+      body: '{"title": "testTitle"}'
+      assertions:
+        - result.statuscode ShouldEqual 400
+    - type: http
+      method: POST
+      url: '{{.endpoint}}'
+      body: '{"price": 5}'
+      assertions:
+        - result.statuscode ShouldEqual 400
+    - type: http
+      method: POST
+      url: '{{.endpoint}}'
+      body: '{"price": "badPrice"}'
+      assertions:
+        - result.statuscode ShouldEqual 400
+
+- name: GET item
+  steps:
+    - type: http
+      method: GET
+      url: '{{.endpoint}}{{.POST.result.bodyjson.id}}'
+      assertions:
+        - result.statuscode ShouldEqual 200
+        - result.bodyjson.__type__ ShouldEqual Map
+        - result.bodyjson.id ShouldEqual {{.POST.result.bodyjson.id}}
+        - result.bodyjson.title ShouldEqual testTitle
+        - result.bodyjson.price ShouldEqual 1712
+    - type: http
+      method: GET
+      url: '{{.endpoint}}{{.inexistantBookUuid}}'
+      assertions:
+        - result.statuscode ShouldEqual 404
+
+- name: PUT
+  steps:
+    - type: http
+      method: PUT
+      url: '{{.endpoint}}{{.POST.result.bodyjson.id}}'
+      body: '{"title": "testPutTitle", "price": 100}'
+      assertions:
+        - result.statuscode ShouldEqual 200
+        - result.bodyjson.__type__ ShouldEqual Map
+        - result.bodyjson.title ShouldEqual testPutTitle
+        - result.bodyjson.price ShouldEqual 100
+
+- name: DELETE
+  steps:
+    - type: http
+      method: DELETE
+      url: '{{.endpoint}}{{.POST.result.bodyjson.id}}'
+      assertions:
+        - result.statuscode ShouldEqual 204
+    - type: http
+      method: DELETE
+      url: '{{.endpoint}}{{.inexistantBookUuid}}'
+      assertions:
+        - result.statuscode ShouldEqual 404
